@@ -337,14 +337,14 @@ func detectCodeExecutablePath() (*string, error) {
 func main() {
 	var err error
 	// Create new parser object
-	parser := argparse.NewParser("rofi-vscode", "Prints a list of vscode workspaces to be used with rofi")
+	parser := argparse.NewParser("rofi-code", "Use rofi to quickly open a VSCode or Codium workspace")
 	// Create string flag
 	s := parser.String("d", "dir", &argparse.Options{Required: false, Help: "Comma separated paths to the config directories", Default: "~/.config/VSCodium,~/.config/Code"})
 	sortOption = parser.Selector("s", "sort", []string{"time", "path", "name"}, &argparse.Options{Required: false, Help: "How the workspaces should be sorted", Default: "time"})
-	fullpath = parser.Flag("f", "full", &argparse.Options{Required: false, Help: "Shows the full path instead contracting the home dir to a tilde", Default: false})
-	var output *bool = parser.Flag("o", "output", &argparse.Options{Required: false, Help: "Just prints the workspaces", Default: false})
-	rofiCmd = parser.String("r", "rofi", &argparse.Options{Required: false, Help: "Rofi command", Default: "rofi -dmenu -p \"Open workspace\" -no-custom"})
-	codeCmd = parser.String("c", "code", &argparse.Options{Required: false, Help: "Editor executable. It will try to detect codium or code", Default: nil})
+	fullpath = parser.Flag("f", "full", &argparse.Options{Required: false, Help: "Show the full path instead of collapsing the home directory to a tilde", Default: false})
+	var output *bool = parser.Flag("o", "output", &argparse.Options{Required: false, Help: "Just prints the workspaces to stdout and exit", Default: false})
+	rofiCmd = parser.String("r", "rofi", &argparse.Options{Required: false, Help: "Command line to launch rofi", Default: "rofi -dmenu -p \"Open workspace\" -no-custom"})
+	codeCmd = parser.String("c", "code", &argparse.Options{Required: false, Help: "Command line to launch the editor. It will try to detect codium or code", Default: nil})
 
 	err = parser.Parse(os.Args)
 	if err != nil {
