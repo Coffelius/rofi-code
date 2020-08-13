@@ -33,7 +33,7 @@ Arguments:
 ```
 I use `rofi-code` everyday using a keystroke combination in my [i3 window manager](https://i3wm.org/) setup with the following line in `~/.config/i3/config`.
 
-```sh
+```
 bindsym $mod+Shift+v exec --no-startup-id rofi-code
 ```
 
@@ -56,7 +56,7 @@ Run the following commands in your terminal
 
 ```console
 foo@bar:~$ go get github.com/Coffelius/rofi-code
-foo@bar:~$ go install github.com/Coffelius/
+foo@bar:~$ go install github.com/Coffelius/rofi-code
 ```
 
 At this point you should have the executable file at `~/go/bin/rofi-code` or wherever your environment variables `$GOHOME` points.
