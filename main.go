@@ -12,20 +12,14 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
-	"sort"
 	"strings"
 	"syscall"
+
+	"./workspace"
 
 	"github.com/Wing924/shellwords"
 	"github.com/akamensky/argparse"
 )
-
-type Workspace struct {
-	Folder   string `json:"folder"`
-	Name     string
-	Basename string
-	Time     int64
-}
 
 type Storage struct {
 	OpenedPathsList struct {
@@ -53,8 +47,8 @@ type Storage struct {
 	} `json:"lastKnownMenuBarData"`
 }
 
-func newWorkspaceFromPath(j string) (*Workspace, error) {
-	var workspace Workspace
+func newWorkspaceFromPath(j string) (*workspace.Workspace, error) {
+	var workspace workspace.Workspace
 	var err error
 
 	workspace.Folder = j
@@ -73,8 +67,8 @@ func newWorkspaceFromPath(j string) (*Workspace, error) {
 	return &workspace, nil
 }
 
-func getWorkspacesFromStorage(s string) []Workspace {
-	var workspaces []Workspace
+func getWorkspacesFromStorage(s string) workspace.WorkspaceCollection {
+	var workspaces workspace.WorkspaceCollection
 	var storage Storage
 	var err error
 
@@ -84,7 +78,7 @@ func getWorkspacesFromStorage(s string) []Workspace {
 	}
 
 	for _, j := range storage.OpenedPathsList.Workspaces3 {
-		var workspace *Workspace
+		var workspace *workspace.Workspace
 		var err error
 
 		workspace, err = newWorkspaceFromPath(j)
@@ -102,7 +96,7 @@ func getWorkspacesFromStorage(s string) []Workspace {
 			continue
 		}
 		for _, submenu := range item.Submenu.Items {
-			var workspace *Workspace
+			var workspace *workspace.Workspace
 			workspace, err = newWorkspaceFromPath(submenu.URI.External)
 			if err != nil {
 				continue
@@ -134,7 +128,7 @@ func loadJSON(filename string, v interface{}) error {
 	return err
 }
 
-func getWorkspace(s string) (*Workspace, error) {
+func getWorkspace(s string) (*workspace.Workspace, error) {
 	var modifiedtime int64 = 0
 	var err error
 	var file os.FileInfo
@@ -148,7 +142,7 @@ func getWorkspace(s string) (*Workspace, error) {
 		modifiedtime = file.ModTime().Unix()
 	}
 
-	var workspace Workspace
+	var workspace workspace.Workspace
 
 	err = loadJSON(path.Join(s, "workspace.json"), &workspace)
 	if err != nil {
@@ -171,47 +165,6 @@ func getWorkspace(s string) (*Workspace, error) {
 	}
 	return &workspace, nil
 }
-
-func getUniqueWorkspaces(workspaces []Workspace) []Workspace {
-	var out []Workspace
-
-	if len(workspaces) < 2 {
-		return workspaces
-	}
-
-	for i := len(workspaces) - 1; i > 0; i-- {
-		duplicated := false
-		for j := i - 1; j >= 0; j-- {
-			if workspaces[i].Name == workspaces[j].Name {
-				duplicated = true
-				break
-			}
-		}
-		if !duplicated {
-			out = append(workspaces[i:i+1], out...)
-		}
-	}
-	out = append(workspaces[0:1], out...)
-	return out
-}
-
-type byTime []Workspace
-
-func (a byTime) Len() int           { return len(a) }
-func (a byTime) Less(i, j int) bool { return a[i].Time > a[j].Time }
-func (a byTime) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
-type byName []Workspace
-
-func (a byName) Len() int           { return len(a) }
-func (a byName) Less(i, j int) bool { return a[i].Basename < a[j].Basename }
-func (a byName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-
-type byPath []Workspace
-
-func (a byPath) Len() int           { return len(a) }
-func (a byPath) Less(i, j int) bool { return a[i].Folder < a[j].Folder }
-func (a byPath) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 var homeDir string
 var rofiCmd *string
@@ -244,7 +197,7 @@ func contractTilde(s string) string {
 	return s
 }
 
-func runRofi(workspaces []Workspace) {
+func runRofi(workspaces workspace.WorkspaceCollection) {
 	args, err := shellwords.Split(*rofiCmd)
 	if err != nil {
 		log.Fatal(err)
@@ -286,22 +239,8 @@ func runRofi(workspaces []Workspace) {
 	}
 }
 
-func sortWorkspaces(workspaces []Workspace) {
-	switch *sortOption {
-	case "name":
-		sort.Sort(byName(workspaces))
-		break
-	case "path":
-		sort.Sort(byPath(workspaces))
-		break
-	case "time":
-	default:
-		sort.Sort(byTime(workspaces))
-	}
-}
-
-func getWorkspacesFromUserWorkspace(basePath string) []Workspace {
-	var workspaces []Workspace
+func getWorkspacesFromUserWorkspace(basePath string) workspace.WorkspaceCollection {
+	var workspaces workspace.WorkspaceCollection
 
 	paths, err := filepath.Glob(path.Join(basePath, "User/workspaceStorage/*"))
 	if err != nil {
@@ -365,7 +304,7 @@ func main() {
 		basePaths[i] = expandTilde(strings.TrimSpace(basePaths[i]))
 	}
 
-	var workspaces []Workspace
+	var workspaces workspace.WorkspaceCollection
 
 	for _, basePath := range basePaths {
 
@@ -373,23 +312,23 @@ func main() {
 	}
 
 	if *sortOption == "time" {
-		sortWorkspaces(workspaces)
+		workspaces.Sort(*sortOption)
 	}
 
-	var workspacesFromJSON []Workspace
+	var workspacesFromJSON workspace.WorkspaceCollection
 
 	for _, basePath := range basePaths {
 		workspacesFromJSON = append(workspacesFromJSON, getWorkspacesFromStorage(basePath)...)
 	}
 
 	workspaces = append(workspacesFromJSON, workspaces...)
-	workspaces = getUniqueWorkspaces(workspaces)
+	workspaces = workspaces.Unique()
 
 	if len(workspaces) == 0 {
 		log.Fatal("Not found any workspace")
 	}
 	if *sortOption != "time" {
-		sortWorkspaces(workspaces)
+		workspaces.Sort(*sortOption)
 	}
 
 	if *output {
