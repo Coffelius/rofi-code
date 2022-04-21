@@ -56,12 +56,9 @@ func (workspaces WorkspaceCollection) Sort(sortOption string) {
 	switch sortOption {
 	case "name":
 		sort.Sort(ByName(workspaces))
-		break
 	case "path":
 		sort.Sort(ByPath(workspaces))
-		break
 	case "time":
-	default:
 		sort.Sort(ByTime(workspaces))
 	}
 }

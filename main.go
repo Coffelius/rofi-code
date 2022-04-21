@@ -15,8 +15,7 @@ import (
 	"strings"
 	"syscall"
 
-	"./workspace"
-
+	"github.com/Coffelius/rofi-code/workspace"
 	"github.com/Wing924/shellwords"
 	"github.com/akamensky/argparse"
 )
@@ -278,7 +277,7 @@ func main() {
 	// Create new parser object
 	parser := argparse.NewParser("rofi-code", "Use rofi to quickly open a VSCode or Codium workspace")
 	// Create string flag
-	s := parser.String("d", "dir", &argparse.Options{Required: false, Help: "Comma separated paths to the config directories", Default: "~/.config/VSCodium,~/.config/Code"})
+	s := parser.String("d", "dir", &argparse.Options{Required: false, Help: "Comma separated paths to the config directories", Default: "~/.config/VSCodium,~/.config/Code,~/.config/Code\\ -\\ OSS"})
 	sortOption = parser.Selector("s", "sort", []string{"time", "path", "name"}, &argparse.Options{Required: false, Help: "How the workspaces should be sorted", Default: "time"})
 	fullpath = parser.Flag("f", "full", &argparse.Options{Required: false, Help: "Show the full path instead of collapsing the home directory to a tilde", Default: false})
 	var output *bool = parser.Flag("o", "output", &argparse.Options{Required: false, Help: "Just prints the workspaces to stdout and exit", Default: false})
