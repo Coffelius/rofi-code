@@ -42,27 +42,22 @@ bindsym $mod+Shift+v exec --no-startup-id rofi-code
 Of course you will need [rofi](https://github.com/davatorium/rofi) installed. 
 
 Also you will be required to have installed the go language tools in your system as a prerequisite to build this software. Why? Because this is coded in go.
+## Install in Arch Linux
 
-On Debian or Ubuntu systems, it should be enough to write this
+Use any Arch User Repository helper `yaourt`, `yay`, `paru` for installing the [rofi-code-git package](https://aur.archlinux.org/packages/rofi-code-git)
+
+For example:
 ```console
-foo@bar:~$ sudo apt install golang
+foo@bar:~$ yay -S rofi-code-git
 ```
 
-For any other system the [official website](https://golang.org/doc/install) is not a bad starting point.
-
-## How to install
+## Install from sources
 
 Run the following commands in your terminal
 
 ```console
-foo@bar:~$ go get github.com/Coffelius/rofi-code
-foo@bar:~$ go install github.com/Coffelius/rofi-code
+foo@bar:~$ git clone https://github.com/Coffelius/rofi-code.git
+foo@bar:~$ make install
 ```
-
-At this point you should have the executable file at `~/go/bin/rofi-code` or wherever your environment variables `$GOHOME` points.
-
-Feel free to alter your `$PATH` if it doesn't include the place where the binary was stored or just copy `rofi-code` binary to some sensitive place like `/usr/local/bin`
-
-
 
 
