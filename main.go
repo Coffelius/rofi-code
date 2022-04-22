@@ -20,6 +20,7 @@ import (
 	"github.com/akamensky/argparse"
 )
 
+// Storage struct represents the structure of a storage.json file
 type Storage struct {
 	OpenedPathsList struct {
 		Workspaces3 []string `json:"workspaces3"`
@@ -110,7 +111,7 @@ func getWorkspacesFromStorage(s string) workspace.WorkspaceCollection {
 }
 
 func loadJSON(filename string, v interface{}) error {
-	var err error = nil
+	var err error
 
 	jsonFile, err := os.Open(filename)
 	// if we os.Open returns an error then handle it
@@ -128,7 +129,7 @@ func loadJSON(filename string, v interface{}) error {
 }
 
 func getWorkspace(s string) (*workspace.Workspace, error) {
-	var modifiedtime int64 = 0
+	var modifiedtime int64
 	var err error
 	var file os.FileInfo
 
