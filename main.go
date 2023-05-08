@@ -67,6 +67,7 @@ func newWorkspaceFromPath(j string) (*workspace.Workspace, error) {
 	return &workspace, nil
 }
 
+// Get the list of workspaces from the storage.json file
 func getWorkspacesFromStorage(s string) workspace.WorkspaceCollection {
 	var workspaces workspace.WorkspaceCollection
 	var storage Storage
@@ -282,6 +283,7 @@ func main() {
 	sortOption = parser.Selector("s", "sort", []string{"time", "path", "name"}, &argparse.Options{Required: false, Help: "How the workspaces should be sorted", Default: "time"})
 	fullpath = parser.Flag("f", "full", &argparse.Options{Required: false, Help: "Show the full path instead of collapsing the home directory to a tilde", Default: false})
 	var output *bool = parser.Flag("o", "output", &argparse.Options{Required: false, Help: "Just prints the workspaces to stdout and exit", Default: false})
+	insensitive := parser.Flag("i", "insensitive", &argparse.Options{Required: false, Help: "Case insensitive search", Default: false})
 	rofiCmd = parser.String("r", "rofi", &argparse.Options{Required: false, Help: "Command line to launch rofi", Default: "rofi -dmenu -p \"Open workspace\" -no-custom"})
 	codeCmd = parser.String("c", "code", &argparse.Options{Required: false, Help: "Command line to launch the editor. It will try to detect codium or code", Default: nil})
 
@@ -295,6 +297,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	if *insensitive {
+		*rofiCmd += " -i"
 	}
 
 	var basePaths []string
